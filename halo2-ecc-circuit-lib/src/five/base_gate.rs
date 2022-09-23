@@ -126,4 +126,22 @@ impl<N: FieldExt> BaseGateOps<N> for FiveColumnBaseGate<N> {
             self.mul_add2(ctx, a, b, c, c_coeff, &acc, one)
         })
     }
+
+    /// a general decomposition gate (not necessarily binary decomposition)
+    /// where `a` are enforced to decomposed to `a_chunks_le` which consists
+    /// of chunks (multiple bits) in little-endian order and
+    /// each chunk \in [0, `range_size`)
+    fn assert_decomposition(
+        &self,
+        ctx: &mut Context<'_, N>,
+        a: &AssignedValue<N>,
+        a_chunks_le: &[AssignedValue<N>],
+        range_size: usize,
+    ) -> Result<(), Error>{
+
+
+        
+        Ok(())
+        
+    }
 }

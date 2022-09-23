@@ -128,6 +128,6 @@ impl<'a, 'b, C: CurveAffine> ArithEccChip for EccChip<'a, 'b, C> {
         mut points: Vec<Self::AssignedPoint>,
         scalars: Vec<Self::AssignedScalar>,
     ) -> Result<Self::AssignedPoint, Self::Error> {
-        self.chip.shamir(ctx, &mut points, &scalars)
+        self.chip.msm_shamir(ctx, &mut points, &scalars)
     }
 }

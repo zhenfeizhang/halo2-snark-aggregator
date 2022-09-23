@@ -9,6 +9,7 @@ use crate::{
 };
 use group::ff::{Field, PrimeField};
 use halo2_proofs::{arithmetic::CurveAffine, plonk::Error};
+use halo2curves::FieldExt;
 use num_bigint::BigUint;
 
 pub struct NativeEccChip<'a, C: CurveAffine>(pub EccChip<'a, C, C::ScalarExt>);
@@ -35,6 +36,8 @@ impl<'a, C: CurveAffine> NativeEccChip<'a, C> {
 }
 
 impl<'a, C: CurveAffine> EccChipOps<C, C::ScalarExt> for NativeEccChip<'a, C> {
+    type AssignedScalar = AssignedValue<C::ScalarExt>;
+
     fn integer_chip(&self) -> &dyn IntegerChipOps<C::Base, C::ScalarExt> {
         self.0.integer_chip
     }
@@ -131,5 +134,36 @@ impl<'a, C: CurveAffine> EccChipOps<C, C::ScalarExt> for NativeEccChip<'a, C> {
         Ok(ret)
     }
 
-    type AssignedScalar = AssignedValue<C::ScalarExt>;
+    #[inline]
+    /// Decompose a `scalar_bit_length`-bit scalar `s` into many c-bit scalar
+    /// variables `{s0, ..., s_m}` such that `s = \sum_{j=0..m} 2^{cj} * s_j`
+    fn decompose_scalar_pippenger(
+        ctx: &mut Context<C::ScalarExt>,
+        scalar: &Self::AssignedScalar,
+        c: usize,
+        scalar_bit_length: usize,
+    ) -> Result<Vec<Self::AssignedScalar>, Error> {
+        // create witness
+        let m = (scalar_bit_length - 1) / c + 1;
+
+        let mut scalar_val = scalar.value;
+
+        // let decomposed_scalar_vars = (0..m)
+        //     .map(|_| {
+        //         // We mod the remaining bits by 2^{window size}, thus taking `c` bits.
+        //         let scalar_u64 = scalar_val.as_ref()[0] % (1 << c);
+        //         // We right-shift by c bits, thus getting rid of the
+        //         // lower bits.
+        //         scalar_val.divn(c as u32);
+        //         circuit.create_variable(F::from(scalar_u64))
+        //     })
+        //     .collect::<Result<Vec<_>, _>>()?;
+
+        // create circuit
+        let range_size = C::ScalarExt::from_u128((1 << c) as u128);
+        // circuit.decomposition_gate(decomposed_scalar_vars.clone(), scalar_var, range_size)?;
+
+        // Ok(decomposed_scalar_vars)
+        todo!()
+    }
 }

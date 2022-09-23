@@ -166,7 +166,7 @@ impl<C: CurveAffine> TestFiveColumnNativeEccChipCircuit<C> {
         let assigned_s3 = base_gate.assign_constant(ctx, s3)?;
         let assigned_s4 = base_gate.assign_constant(ctx, s4)?;
 
-        let mut p = ecc_gate.shamir(
+        let mut p = ecc_gate.msm_shamir(
             ctx,
             &mut vec![p1.clone(), p2],
             &vec![assigned_s3, assigned_s4],
@@ -174,7 +174,7 @@ impl<C: CurveAffine> TestFiveColumnNativeEccChipCircuit<C> {
         let mut p_ = ecc_gate.assign_constant_point_from_scalar(ctx, s1 * s3 + s2 * s4)?;
         ecc_gate.assert_equal(ctx, &mut p, &mut p_)?;
 
-        let mut p = ecc_gate.shamir(ctx, &mut vec![p1], &vec![assigned_s3])?;
+        let mut p = ecc_gate.msm_shamir(ctx, &mut vec![p1], &vec![assigned_s3])?;
         let mut p_ = ecc_gate.assign_constant_point_from_scalar(ctx, s1 * s3)?;
         ecc_gate.assert_equal(ctx, &mut p, &mut p_)?;
 

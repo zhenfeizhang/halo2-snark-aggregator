@@ -55,3 +55,12 @@ pub fn get_d_range_bits_in_mul<W: FieldExt, N: FieldExt>(integer_modulus: &BigUi
 
     d_range_bits
 }
+
+/// The result of this function is only approximately `ln(a)`
+/// [`Explanation of usage`]
+///
+/// [`Explanation of usage`]: https://github.com/scipr-lab/zexe/issues/79#issue-556220473
+pub(crate) fn ln_without_floats(a: usize) -> usize {
+    // log2(a) * ln(2)
+    (f64::log2(a as f64) * 69f64 / 100f64) as usize
+}

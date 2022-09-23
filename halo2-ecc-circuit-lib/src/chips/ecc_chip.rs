@@ -1,7 +1,10 @@
 use super::integer_chip::{AssignedInteger, IntegerChipOps};
-use crate::gates::{
-    base_gate::{AssignedCondition, BaseGateOps, Context},
-    range_gate::RangeGateOps,
+use crate::{
+    gates::{
+        base_gate::{AssignedCondition, BaseGateOps, Context},
+        range_gate::RangeGateOps,
+    },
+    utils::ln_without_floats,
 };
 use group::ff::Field;
 use group::{Curve, Group};
@@ -136,7 +139,53 @@ pub trait EccChipOps<C: CurveAffine, N: FieldExt> {
             Err(Error::Synthesis)
         }
     }
-    fn shamir(
+
+    /// Decompose a `scalar_bit_length`-bit scalar `s` into many c-bit scalar
+    /// variables `{s0, ..., s_m}` such that `s = \sum_{j=0..m} 2^{cj} * s_j`
+    fn decompose_scalar_pippenger(
+        ctx: &mut Context<N>,
+        scalar: &Self::AssignedScalar,
+        c: usize,
+        scalar_bit_length: usize,
+    ) -> Result<Vec<Self::AssignedScalar>, Error>;
+
+    /// Multi-scalar multiplication via Pippenger algorithm.
+    /// Algorithm follows the variant in
+    /// https://github.com/EspressoSystems/jellyfish/blob/ff432092b5ee01d3b9fdc59929bd02eca3c29141/relation/src/gadgets/ecc/msm.rs#L189
+    fn msm_pippenger(
+        &self,
+        ctx: &mut Context<N>,
+        points: &mut Vec<AssignedPoint<C, N>>,
+        scalars: &Vec<Self::AssignedScalar>,
+        scalar_bit_length: usize,
+    ) -> Result<AssignedPoint<C, N>, Error> {
+        assert!(points.len() == scalars.len());
+        let c = if scalar_bit_length < 32 {
+            3
+        } else {
+            ln_without_floats(scalar_bit_length)
+        };
+
+        // ================================================
+        // compute lookup tables and window sums
+        // ================================================
+        let identity = self.assign_identity(ctx)?;
+
+        // Each window is of size `c`.
+        // We divide up the bits 0..scalar_bit_length into windows of size `c`, and
+        // in parallel process each such window.
+        // let mut window_sums = Vec::new();
+
+        for (point, scalar) in points.iter().zip(scalars.iter()) {
+            // decompose scalar into c-bit scalars
+            // let decomposed_scalar_vars =
+            // decompose_scalar_var(circuit, scalar_var, c, scalar_bit_length)
+        }
+
+        todo!()
+    }
+
+    fn msm_shamir(
         &self,
         ctx: &mut Context<N>,
         points: &mut Vec<AssignedPoint<C, N>>,
